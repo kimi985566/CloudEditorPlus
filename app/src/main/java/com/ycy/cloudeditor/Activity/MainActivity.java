@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity
 
         private ItemTouchHelperAdapter itemTouchHelperAdapter;
         private int mPosition;
-        private NoteInfo mNoteInfo;
+        private NoteInfo mNoteInfoTemp;
 
         public myItemTouchHelperCallBack(ItemTouchHelperAdapter itemTouchHelperAdapter) {
             this.itemTouchHelperAdapter = itemTouchHelperAdapter;
@@ -329,10 +329,8 @@ public class MainActivity extends AppCompatActivity
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             //onItemDelete接口里的方法
             mPosition = viewHolder.getAdapterPosition();
-            mNoteInfo = mNoteInfoArrayList.get(mPosition);
+            mNoteInfoTemp = mNoteInfoArrayList.get(mPosition);
             itemTouchHelperAdapter.onItemDelete(mPosition);
-
-            //@#$@#$@#$@#$@#$@#@#$
 
             SnackbarUtils.with(mFab)
                     .setMessage("删除第" + (mPosition + 1) + "条数据")
@@ -340,7 +338,7 @@ public class MainActivity extends AppCompatActivity
                     .setAction("撤销", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            itemTouchHelperAdapter.onItemRecover(mPosition, mNoteInfo);
+                            itemTouchHelperAdapter.onItemRecover(mPosition, mNoteInfoTemp);
                         }
                     })
                     .show();
