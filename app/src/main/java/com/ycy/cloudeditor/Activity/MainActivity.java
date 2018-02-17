@@ -332,6 +332,8 @@ public class MainActivity extends AppCompatActivity
             mNoteInfo = mNoteInfoArrayList.get(mPosition);
             itemTouchHelperAdapter.onItemDelete(mPosition);
 
+            //@#$@#$@#$@#$@#$@#@#$
+
             SnackbarUtils.with(mFab)
                     .setMessage("删除第" + (mPosition + 1) + "条数据")
                     .setDuration(SnackbarUtils.LENGTH_SHORT)
