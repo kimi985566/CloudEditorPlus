@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity
             itemTouchHelperAdapter.onItemDelete(mPosition);
 
             SnackbarUtils.with(mFab)
-                    .setMessage("删除一条数据")
+                    .setMessage("删除第" + (mPosition + 1) + "条数据")
                     .setDuration(SnackbarUtils.LENGTH_SHORT)
                     .setAction("撤销", new View.OnClickListener() {
                         @Override
