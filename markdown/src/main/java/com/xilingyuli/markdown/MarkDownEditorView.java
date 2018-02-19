@@ -11,12 +11,10 @@ import android.widget.EditText;
 
 import java.util.regex.Pattern;
 
-/**
- * Created by xilingyuli on 2017/2/28.
- */
 
 public class MarkDownEditorView extends EditText {
     Pattern orderPattern = Pattern.compile("^[0-9]+\\. ");
+
     public MarkDownEditorView(Context context) {
         super(context);
         init();
@@ -38,32 +36,29 @@ public class MarkDownEditorView extends EditText {
         init();
     }
 
-    private void init()
-    {
+    private void init() {
         this.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //新增字符
-                if(i1==0)
-                {
-                    String str = charSequence+"";
+                if (i1 == 0) {
+                    String str = charSequence + "";
                     //新增的是回车符
-                    if(!str.isEmpty()&&str.charAt(i)=='\n')
-                    {
+                    if (!str.isEmpty() && str.charAt(i) == '\n') {
                         String lastLine = getLastLine();
-                        if(lastLine.startsWith("* ")) {
-                            MarkDownEditorView.this.getText().insert(i+1,"* ");
+                        if (lastLine.startsWith("* ")) {
+                            MarkDownEditorView.this.getText().insert(i + 1, "* ");
                         }
-                        if(lastLine.startsWith("> ")) {
-                            MarkDownEditorView.this.getText().insert(i+1,"> ");
+                        if (lastLine.startsWith("> ")) {
+                            MarkDownEditorView.this.getText().insert(i + 1, "> ");
                         }
-                        if(orderPattern.matcher(lastLine).lookingAt())
-                        {
-                            int num = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(".")))+1;
-                            MarkDownEditorView.this.getText().insert(i+1,num+". ");
+                        if (orderPattern.matcher(lastLine).lookingAt()) {
+                            int num = Integer.parseInt(lastLine.substring(0, lastLine.indexOf("."))) + 1;
+                            MarkDownEditorView.this.getText().insert(i + 1, num + ". ");
                         }
                     }
                 }
@@ -81,92 +76,78 @@ public class MarkDownEditorView extends EditText {
         lineStyle(newStr);
     }
 
-    public void insertLine()
-    {
-        String source = getText()+"";
+    public void insertLine() {
+        String source = getText() + "";
         int start = getSelectionStart();
 
         String newStr = "---";
-        if(start==0 || source.charAt(start-1)!='\n')
-            newStr = "\n"+newStr;
-        if(start==source.length() || source.charAt(start)!='\n')
+        if (start == 0 || source.charAt(start - 1) != '\n')
+            newStr = "\n" + newStr;
+        if (start == source.length() || source.charAt(start) != '\n')
             newStr += "\n";
         getText().insert(start, newStr);
     }
 
-    public void bold()
-    {
+    public void bold() {
         textStyle("**");
     }
 
-    public void italic()
-    {
+    public void italic() {
         textStyle("_");
     }
 
-    public void strikethrough()
-    {
+    public void strikethrough() {
         textStyle("~~");
     }
 
-    public void unordered()
-    {
+    public void unordered() {
         lineStyle("* ");
     }
 
-    public void ordered()
-    {
-        String source = getText()+"";
+    public void ordered() {
+        String source = getText() + "";
         int begin = getLineBeginIndex();
         int end = getNextLineBeginIndex();
         String result = source.substring(begin, end);
 
         //取消标号
-        if(orderPattern.matcher(result).lookingAt())
-        {
-            result = result.replaceFirst("[0-9]+\\. ","");
+        if (orderPattern.matcher(result).lookingAt()) {
+            result = result.replaceFirst("[0-9]+\\. ", "");
         }
         //添加标号
-        else
-        {
+        else {
             int num = 1;
             String lastLine = getLastLine();
             if (orderPattern.matcher(lastLine).lookingAt()) {
-                num = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(".")))+1;
+                num = Integer.parseInt(lastLine.substring(0, lastLine.indexOf("."))) + 1;
             }
-            result = num+". "+result;
+            result = num + ". " + result;
         }
         getText().replace(begin, end, result);
-        setSelection(begin+result.length());
+        setSelection(begin + result.length());
     }
 
-    public void blockquote()
-    {
+    public void blockquote() {
         lineStyle("> ");
     }
 
-    public void codeSingle()
-    {
+    public void codeSingle() {
         textStyle("`");
     }
 
-    public void code()
-    {
+    public void code() {
         textStyle("\n```\n");
     }
 
-    public void insertImage(String url)
-    {
+    public void insertImage(String url) {
         insert("![image](" + url + ")");
     }
 
-    public void insertLink(Pair<String, String> info)
-    {
-        insert("["+info.first+"]("+info.second+")");
+    public void insertLink(Pair<String, String> info) {
+        insert("[" + info.first + "](" + info.second + ")");
     }
 
-    public void insertTable(Pair<Integer,Integer> size)
-    {
+    public void insertTable(Pair<Integer, Integer> size) {
         int end = getNextLineBeginIndex();
         int row = size.first;
         int column = size.second;
@@ -191,16 +172,15 @@ public class MarkDownEditorView extends EditText {
         setSelection(end + result.length());
     }
 
-    private void textStyle(String str)
-    {
+    private void textStyle(String str) {
         int num = str.length();
-        String source = getText()+"";
+        String source = getText() + "";
         int start = getSelectionStart();
         int end = getSelectionEnd();
 
         String result = source.substring(start, end);
         //取消样式
-        if(source.substring(0,start).endsWith(str) && source.substring(end).startsWith(str)) {
+        if (source.substring(0, start).endsWith(str) && source.substring(end).startsWith(str)) {
             getText().replace(start - num, end + num, result);
             this.setSelection(start - num, end - num);
         }
@@ -211,53 +191,48 @@ public class MarkDownEditorView extends EditText {
         }
     }
 
-    private void lineStyle(String str)
-    {
-        String source = getText()+"";
+    private void lineStyle(String str) {
+        String source = getText() + "";
         int begin = getLineBeginIndex();
         int end = getNextLineBeginIndex();
 
         String result = source.substring(begin, end);
 
         //取消样式
-        if(result.startsWith(str))
-            result = result.replace(str,"");
-        //添加样式
+        if (result.startsWith(str))
+            result = result.replace(str, "");
+            //添加样式
         else
             result = str + result;
         getText().replace(begin, end, result);
-        int select = begin+result.length();
-        if(result.endsWith("\n"))
+        int select = begin + result.length();
+        if (result.endsWith("\n"))
             select--;
         setSelection(select);
     }
 
-    private void insert(String str)
-    {
+    private void insert(String str) {
         int selection = getSelectionStart();
         getText().insert(selection, str);
-        setSelection(selection+str.length());
+        setSelection(selection + str.length());
     }
 
-    public String getLastLine()
-    {
-        String source = getText()+"";
-        int end = source.substring(0,getSelectionStart()).lastIndexOf('\n')+1;
-        int begin = (end==0?-1:source.substring(0, end-1).lastIndexOf('\n'))+1;
+    public String getLastLine() {
+        String source = getText() + "";
+        int end = source.substring(0, getSelectionStart()).lastIndexOf('\n') + 1;
+        int begin = (end == 0 ? -1 : source.substring(0, end - 1).lastIndexOf('\n')) + 1;
         return source.substring(begin, end);
     }
 
-    public int getLineBeginIndex()
-    {
-        String source = getText()+"";
-        return source.substring(0,getSelectionStart()).lastIndexOf('\n')+1;
+    public int getLineBeginIndex() {
+        String source = getText() + "";
+        return source.substring(0, getSelectionStart()).lastIndexOf('\n') + 1;
     }
 
-    public int getNextLineBeginIndex()
-    {
-        String source = getText()+"";
-        int nextEnter = source.indexOf('\n',getSelectionStart());
-        return nextEnter==-1?source.length():nextEnter+1;
+    public int getNextLineBeginIndex() {
+        String source = getText() + "";
+        int nextEnter = source.indexOf('\n', getSelectionStart());
+        return nextEnter == -1 ? source.length() : nextEnter + 1;
     }
 
 }

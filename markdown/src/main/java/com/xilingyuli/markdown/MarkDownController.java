@@ -5,9 +5,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
 
-/**
- * Created by xilingyuli on 2017/2/28.
- */
 
 public class MarkDownController implements TextWatcher {
 
@@ -16,13 +13,11 @@ public class MarkDownController implements TextWatcher {
     private final ToolsAdapter toolsAdapter;
     private boolean autoPreview = false;
 
-    MarkDownController(@NonNull MarkDownEditorView editorView,@NonNull  MarkDownPreviewView previewView,@NonNull  ToolsAdapter toolsAdapter)
-    {
-        this(editorView,previewView,toolsAdapter,true);
+    MarkDownController(@NonNull MarkDownEditorView editorView, @NonNull MarkDownPreviewView previewView, @NonNull ToolsAdapter toolsAdapter) {
+        this(editorView, previewView, toolsAdapter, true);
     }
 
-    public MarkDownController(@NonNull MarkDownEditorView editorView, @NonNull MarkDownPreviewView previewView, @NonNull ToolsAdapter toolsAdapter, boolean autoPreview)
-    {
+    public MarkDownController(@NonNull MarkDownEditorView editorView, @NonNull MarkDownPreviewView previewView, @NonNull ToolsAdapter toolsAdapter, boolean autoPreview) {
         this.editorView = editorView;
         this.previewView = previewView;
         this.toolsAdapter = toolsAdapter;
@@ -37,40 +32,34 @@ public class MarkDownController implements TextWatcher {
         setAutoPreview(autoPreview);
     }
 
-    public void setAutoPreview(boolean autoPreview)
-    {
-        if(this.autoPreview==autoPreview)
+    public void setAutoPreview(boolean autoPreview) {
+        if (this.autoPreview == autoPreview)
             return;
         this.autoPreview = autoPreview;
-        if(autoPreview)
+        if (autoPreview)
             editorView.addTextChangedListener(this);
         else
             editorView.removeTextChangedListener(this);
     }
 
-    public void setOnPreInsertListener(OnPreInsertListener listener)
-    {
+    public void setOnPreInsertListener(OnPreInsertListener listener) {
         toolsAdapter.setOnPreInsertListener(listener);
     }
 
-    public void insertImage(String url)
-    {
+    public void insertImage(String url) {
         editorView.insertImage(url);
     }
 
-    public void insertLink(Pair<String, String> info)
-    {
+    public void insertLink(Pair<String, String> info) {
         editorView.insertLink(info);
     }
 
-    public void insertTable(Pair<Integer,Integer> size)
-    {
+    public void insertTable(Pair<Integer, Integer> size) {
         editorView.insertTable(size);
     }
 
-    public void preview()
-    {
-        previewView.preview(editorView.getText()+"");
+    public void preview() {
+        previewView.preview(editorView.getText() + "");
     }
 
     @Override

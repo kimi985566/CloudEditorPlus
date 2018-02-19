@@ -8,10 +8,6 @@ import android.util.AttributeSet;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-/**
- * Created by xilingyuli on 2017/2/28.
- */
-
 public class MarkDownPreviewView extends WebView {
 
     private String markdownString = "";
@@ -44,8 +40,7 @@ public class MarkDownPreviewView extends WebView {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void init()
-    {
+    private void init() {
         getSettings().setJavaScriptEnabled(true);
         //getSettings().setUseWideViewPort(true);
         setVerticalScrollBarEnabled(false);
@@ -60,8 +55,7 @@ public class MarkDownPreviewView extends WebView {
         preview("");
     }
 
-    public void preview(String markdownString)
-    {
+    public void preview(String markdownString) {
         this.markdownString = markdownString;
         loadUrl("file:///android_asset/markdown.html");
     }

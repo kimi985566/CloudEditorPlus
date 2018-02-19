@@ -6,6 +6,8 @@ package com.xilingyuli.markdown;
 
 public interface OnPreInsertListener {
     public void onPreInsertImage();
+
     public void onPreInsertLink();
+
     public void onPreInsertTable();
 }
