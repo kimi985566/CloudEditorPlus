@@ -25,8 +25,6 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
 
     public static String TAG = MainRecycleViewAdapter.class.getSimpleName();
 
-    private static final int TYPE_ITEM = 0;
-    private static final int TYPE_FOOTER = 1;
     private Context mContext;
     private List<NoteInfo> mNoteInfoList;
 

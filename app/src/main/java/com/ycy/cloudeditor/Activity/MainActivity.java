@@ -20,12 +20,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupWindow;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SnackbarUtils;
@@ -38,8 +36,6 @@ import com.ycy.cloudeditor.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,9 +62,7 @@ public class MainActivity extends AppCompatActivity
     private ActionBarDrawerToggle mToggle;
     private static final int RC_STORAGE = 101;
     private boolean mIsExit;
-    private int longClickPosition;
-    private PopupWindow mPopupWindow;
-    private boolean isScroll = true;
+
     String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET};
     String format = "yyyy-MM-dd HH:mm:ss";
@@ -129,6 +123,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         initData();
+
         mLinearLayoutManager = new LinearLayoutManager(this);
         mMRecycleView.setLayoutManager(mLinearLayoutManager);
         mRecycleViewAdapter = new MainRecycleViewAdapter(this, mNoteInfoArrayList);
@@ -137,12 +132,18 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                Log.d("MainActivity", "StateChanged = " + newState);
+                LogUtils.i("-----------onScrollStateChanged-----------");
+                LogUtils.i("newState: " + newState);
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                LogUtils.i("-----------onScrolled-----------");
+                LogUtils.i("dx: " + dx);
+                LogUtils.i("dy: " + dy);
+                LogUtils.i("CHECK_SCROLL_UP: " + recyclerView.canScrollVertically(1));
+                LogUtils.i("CHECK_SCROLL_DOWN: " + recyclerView.canScrollVertically(-1));
             }
         });
 
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                addtestdata();
+                addtestdata();//测试数据
             }
         }, 1500);
     }
@@ -299,8 +300,6 @@ public class MainActivity extends AppCompatActivity
 
     class myItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
-        BlockingQueue queue = new ArrayBlockingQueue(5);
-
         private ItemTouchHelperAdapter itemTouchHelperAdapter;
         private int mPosition;
         private NoteInfo mNoteInfoTemp;
@@ -334,7 +333,7 @@ public class MainActivity extends AppCompatActivity
 
             SnackbarUtils.with(mFab)
                     .setMessage("删除第" + (mPosition + 1) + "条数据")
-                    .setDuration(SnackbarUtils.LENGTH_SHORT)
+                    .setDuration(SnackbarUtils.LENGTH_LONG)
                     .setAction("撤销", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {

@@ -16,28 +16,20 @@ public class NoteInfo implements Serializable {
      * content- 内容
      * time-修改时间
      */
-    private int id;
+    private int genius_id;
     private String Title;
     private String content;
     private String time;
-    private int index;
 
     public NoteInfo(int id, String title, String content, String time) {
-        this.id = id;
+        this.genius_id = id;
         this.Title = title;
         this.content = content;
         this.time = time;
     }
 
     public NoteInfo() {
-    }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getTime() {
@@ -47,6 +39,7 @@ public class NoteInfo implements Serializable {
     public void setTime(String time) {
         this.time = time;
     }
+
 
     public String getTitle() {
         return Title;
@@ -64,11 +57,12 @@ public class NoteInfo implements Serializable {
         this.content = content;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setGenius_id(int genius_id) {
+        this.genius_id = genius_id;
     }
 
-    public int getIndex() {
-        return index;
+    public int getGenius_id() {
+        return genius_id;
     }
+
 }
