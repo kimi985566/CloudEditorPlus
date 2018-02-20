@@ -1024,12 +1024,13 @@ body .markdown-body
         page-break-after: avoid;
     }
 }
-</style>
-<script src="marked.js"></script>
+
+    </style>
+    <script src="marked.js"></script>
 </head>
 <body>
-  	<article id="content" class="markdown-body"></article>
-    <script type="text/javascript">
+<article id="content" class="markdown-body"></article>
+<script type="text/javascript">
         function parseMarkdown(content) {
             marked.setOptions({
                 renderer: new marked.Renderer(),
@@ -1048,6 +1049,7 @@ body .markdown-body
             window.handler.onParseFinish();
         }
 
-    </script>
+
+</script>
 </body>
 </html>

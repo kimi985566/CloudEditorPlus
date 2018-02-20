@@ -19,5 +19,5 @@
         android:duration="1500"
         android:fromAlpha="1.0"
         android:interpolator="@android:anim/decelerate_interpolator"
-        android:toAlpha="0" />
+        android:toAlpha="0"/>
 </set>
