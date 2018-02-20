@@ -13,4 +13,9 @@
     <color name="recycler_color3">#3F51B5</color>
     <color name="recycler_color4">#68d661</color>
 
+    <color name="mintcream">#f5fffa</color>
+    <color name="orangered">#ff4500</color>
+    <color name="royalblue">#4169e1</color><!--皇家蓝 -->
+    <color name="powderblue">#b0e0e6</color>
+
 </resources>

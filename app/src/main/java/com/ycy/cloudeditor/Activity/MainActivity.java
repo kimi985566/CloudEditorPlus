@@ -45,7 +45,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        EasyPermissions.PermissionCallbacks, SwipeRefreshLayout.OnRefreshListener {
+        EasyPermissions.PermissionCallbacks, SwipeRefreshLayout.OnRefreshListener,
+        View.OnClickListener {
 
     @BindView(R.id.toolbar_main)
     Toolbar mToolbar;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     private ActionBarDrawerToggle mToggle;
     private static final int RC_STORAGE = 101;
+    int topcount = 0;
     private boolean mIsExit;
 
     String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -72,7 +74,6 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
     private MainRecycleViewAdapter mRecycleViewAdapter;
-    int topcount = 0;
     private LinearLayoutManager mLinearLayoutManager;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -88,11 +89,11 @@ public class MainActivity extends AppCompatActivity
 
     private void ask_perms() {
         if (EasyPermissions.hasPermissions(this, perms)) {
-            LogUtils.i(this.getClass().getSimpleName() + " : permissions are granted");
+            LogUtils.i("Permissions are granted");
         } else {
-            LogUtils.i(this.getClass().getSimpleName() + ": these permissions are denied , " +
-                    "ready to request this permission");
-            EasyPermissions.requestPermissions(this, "云存储需要网络、存储权限", RC_STORAGE, perms);
+            LogUtils.i("These permissions are denied , " + "ready to request this permission");
+            EasyPermissions.requestPermissions(this, "云存储需要网络、存储权限",
+                    RC_STORAGE, perms);
         }
     }
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity
     private void initUI() {
         setSupportActionBar(mToolbar);
         getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimary));
-        overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+
         mToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(mToggle);
@@ -154,13 +155,7 @@ public class MainActivity extends AppCompatActivity
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(mMRecycleView);
 
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                startActivity(intent);
-            }
-        });
+        mFab.setOnClickListener(this);
 
     }
 
@@ -295,11 +290,25 @@ public class MainActivity extends AppCompatActivity
         for (int i = topcount; i < topcount + 5; i++) {
             mNoteInfoArrayList.add(new NoteInfo(i, "Title: " + i, "Context: " + i,
                     new SimpleDateFormat(format).format(System.currentTimeMillis())));
-
         }
         topcount += 5;
         mRecycleViewAdapter.notifyDataSetChanged();
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                        startActivity(intent);
+                    }
+                }).start();
+                break;
+        }
     }
 
     class myItemTouchHelperCallBack extends ItemTouchHelper.Callback {
@@ -336,7 +345,7 @@ public class MainActivity extends AppCompatActivity
             itemTouchHelperAdapter.onItemDelete(mPosition);
 
             SnackbarUtils.with(mFab)
-                    .setMessage("删除第" + (mPosition + 1) + "条数据")
+                    .setMessage("删除了一条数据")
                     .setDuration(SnackbarUtils.LENGTH_LONG)
                     .setAction("撤销", new View.OnClickListener() {
                         @Override

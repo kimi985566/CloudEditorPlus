@@ -25,7 +25,7 @@
                 android:id="@+id/toolbar_edit"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/royalblue"
                 android:elevation="4dp"
                 android:minHeight="?attr/actionBarSize"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
@@ -45,7 +45,7 @@
                 android:id="@+id/tools_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
+                android:background="@color/royalblue"
                 android:orientation="horizontal"
                 android:scrollbars="none"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager">
