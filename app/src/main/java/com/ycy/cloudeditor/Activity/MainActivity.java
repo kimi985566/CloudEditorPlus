@@ -39,14 +39,14 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        EasyPermissions.PermissionCallbacks, SwipeRefreshLayout.OnRefreshListener,
-        View.OnClickListener {
+        EasyPermissions.PermissionCallbacks, SwipeRefreshLayout.OnRefreshListener {
 
     @BindView(R.id.toolbar_main)
     Toolbar mToolbar;
@@ -154,9 +154,6 @@ public class MainActivity extends AppCompatActivity
         ItemTouchHelper.Callback callback = new myItemTouchHelperCallBack(mRecycleViewAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(mMRecycleView);
-
-        mFab.setOnClickListener(this);
-
     }
 
     private void initData() {
@@ -170,9 +167,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -219,9 +215,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -296,9 +290,9 @@ public class MainActivity extends AppCompatActivity
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    @OnClick({R.id.fab})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
             case R.id.fab:
                 new Thread(new Runnable() {
                     @Override

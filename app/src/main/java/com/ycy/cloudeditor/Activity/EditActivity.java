@@ -50,6 +50,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -59,7 +60,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  */
 
 public class EditActivity extends AppCompatActivity implements OnPreInsertListener,
-        View.OnClickListener, EasyPermissions.PermissionCallbacks {
+        EasyPermissions.PermissionCallbacks {
 
     @BindView(R.id.tools_edit)
     RecyclerView mToolsEdit;
@@ -138,8 +139,6 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
         //setAdapter
         setAdapterMethod();
 
-        mFabEdit.setOnClickListener(this);
-        mSave.setOnClickListener(this);
     }
 
     private void initFragments() {
@@ -228,21 +227,6 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
     private void initMarkDownController() {
         mMarkDownController = new MarkDownController(mEditorView, mPreviewView, mToolsAdapter, false);
         mMarkDownController.setOnPreInsertListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fab_edit:
-                if (mVpEdit != null) {
-                    int index = 1 - mVpEdit.getCurrentItem();
-                    mVpEdit.setCurrentItem(index, false);
-                }
-                break;
-            case R.id.save:
-                saveFile();
-                break;
-        }
     }
 
     private boolean saveFile() {
@@ -387,6 +371,21 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
         LogUtils.i("EasyPermission CallBack onPermissionsDenied():" + requestCode + ":" + perms.size());
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             new AppSettingsDialog.Builder(this).build().show();
+        }
+    }
+
+    @OnClick({R.id.save, R.id.fab_edit})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.save:
+                saveFile();
+                break;
+            case R.id.fab_edit:
+                if (mVpEdit != null) {
+                    int index = 1 - mVpEdit.getCurrentItem();
+                    mVpEdit.setCurrentItem(index, false);
+                }
+                break;
         }
     }
 }
