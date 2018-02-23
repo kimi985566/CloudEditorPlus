@@ -1,4 +1,4 @@
-package com.ycy.cloudeditor.DataHelper;
+package com.ycy.cloudeditor.DB;
 
 import android.content.Context;
 import android.database.SQLException;
@@ -18,6 +18,7 @@ public class NoteDBHelper extends SQLiteOpenHelper {
     public static final String TITLE = "title";
     public static final String CONTENT = "content";
     public static final String TIME = "time";
+    public static final String FILE_URL = "url";
     public static final int Version = 1;
 
     private Context mContext;
@@ -35,9 +36,10 @@ public class NoteDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE IF NOT EXISTS " + TableName + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,"
-                + TITLE + " TEXT NOT NULL,"
-                + CONTENT + " TEXT,"
-                + TIME + " TEXT NOT NULL,"
+                + TITLE + " TEXT NOT NULL ,"
+                + CONTENT + " TEXT ,"
+                + TIME + " TEXT NOT NULL ,"
+                + FILE_URL + " TEXT NOT NULL ,"
                 + ")";
         try {
             db.execSQL(createTable);

@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
  */
 
 public class fileListener extends FileObserver {
+
     public fileListener(String path) {
         super(path);
     }

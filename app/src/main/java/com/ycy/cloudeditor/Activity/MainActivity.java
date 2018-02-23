@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -33,7 +34,7 @@ import com.ycy.cloudeditor.Bean.NoteInfo;
 import com.ycy.cloudeditor.Listener.ItemTouchHelperAdapter;
 import com.ycy.cloudeditor.R;
 
-import java.text.SimpleDateFormat;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,12 +66,12 @@ public class MainActivity extends AppCompatActivity
 
     private ActionBarDrawerToggle mToggle;
     private static final int RC_STORAGE = 101;
-    int topcount = 0;
     private boolean mIsExit;
 
     String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET};
-    String format = "yyyy-MM-dd HH:mm:ss";
+    public static String Path = Environment.getExternalStorageDirectory()
+            + File.separator + "CloudEditor" + File.separator;
 
     private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
     private MainRecycleViewAdapter mRecycleViewAdapter;
@@ -160,7 +161,8 @@ public class MainActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                addtestdata();//测试数据
+                searchFiles();
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         }, 1500);
     }
@@ -275,19 +277,32 @@ public class MainActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                addtestdata();
+                searchFiles();
+                mSwipeRefreshLayout.setRefreshing(false);
             }
-        }, 2000);
+        }, 1500);
     }
 
-    private void addtestdata() {
-        for (int i = topcount; i < topcount + 5; i++) {
-            mNoteInfoArrayList.add(new NoteInfo(i, "Title: " + i, "Context: " + i,
-                    new SimpleDateFormat(format).format(System.currentTimeMillis())));
+    private List<NoteInfo> searchFiles() {
+        File[] files = new File(Path).listFiles();
+
+        for (int i = 0; i < files.length; i++) {
+            // 判断是否为文件夹
+            if (!files[i].isDirectory()) {
+                String filename = files[i].getName();
+                // 判断是否为MP4结尾
+                if (filename.trim().toLowerCase().endsWith(".txt")) {
+                    String f_name = filename;
+                    String f_path = files[i].getAbsolutePath();
+                    NoteInfo info = new NoteInfo(0, f_name, f_path, String.valueOf(0));
+                    mNoteInfoArrayList.add(info);
+
+                }
+            }
         }
-        topcount += 5;
+
         mRecycleViewAdapter.notifyDataSetChanged();
-        mSwipeRefreshLayout.setRefreshing(false);
+        return mNoteInfoArrayList;
     }
 
     @OnClick({R.id.fab})
