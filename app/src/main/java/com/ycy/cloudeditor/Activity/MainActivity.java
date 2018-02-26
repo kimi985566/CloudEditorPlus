@@ -17,6 +17,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -26,15 +27,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SnackbarUtils;
+import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.Utils;
 import com.ycy.cloudeditor.Adapter.MainRecycleViewAdapter;
 import com.ycy.cloudeditor.Bean.NoteInfo;
-import com.ycy.cloudeditor.Listener.ItemTouchHelperAdapter;
+import com.ycy.cloudeditor.Listener.ItemTouchHelperListener;
+import com.ycy.cloudeditor.Listener.MyItemClickListener;
 import com.ycy.cloudeditor.R;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,10 +140,28 @@ public class MainActivity extends AppCompatActivity
 
         initData();
 
+
         mLinearLayoutManager = new LinearLayoutManager(this);
         mMRecycleView.setLayoutManager(mLinearLayoutManager);
+
         mRecycleViewAdapter = new MainRecycleViewAdapter(this, mNoteInfoArrayList);
+
+        mRecycleViewAdapter.setMyItemClickListener(new MyItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                NoteInfo noteInfo = mNoteInfoArrayList.get(position);
+                Intent intent = new Intent(view.getContext(), EditActivity.class);
+                intent.putExtra(EditActivity.TITLE, noteInfo.getTitle());
+                intent.putExtra(EditActivity.CONTENT, noteInfo.getContent());
+
+                startActivity(intent);
+            }
+        });
+
         mMRecycleView.setAdapter(mRecycleViewAdapter);
+        mMRecycleView.setItemAnimator(new DefaultItemAnimator());
+        mMRecycleView.setHasFixedSize(true);
+
         mMRecycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -161,7 +190,7 @@ public class MainActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                searchFiles();
+                searchFiles(Path);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         }, 1500);
@@ -277,32 +306,71 @@ public class MainActivity extends AppCompatActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                searchFiles();
+                searchFiles(Path);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         }, 1500);
     }
 
-    private List<NoteInfo> searchFiles() {
-        File[] files = new File(Path).listFiles();
+    private List<NoteInfo> searchFiles(String path) {
+        File[] files = new File(path).listFiles();
+
+        if (files == null) {
+            return null;
+        }
 
         for (int i = 0; i < files.length; i++) {
             // 判断是否为文件夹
-            if (!files[i].isDirectory()) {
-                String filename = files[i].getName();
-                // 判断是否为MP4结尾
-                if (filename.trim().toLowerCase().endsWith(".txt")) {
-                    String f_name = filename;
-                    String f_path = files[i].getAbsolutePath();
-                    NoteInfo info = new NoteInfo(0, f_name, f_path, String.valueOf(0));
-                    mNoteInfoArrayList.add(info);
-
+            if (files[i].isDirectory()) {
+                LogUtils.i(files[i].getAbsolutePath());
+                searchFiles(files[i].getAbsolutePath());
+            } else if (!files[i].isHidden() && files[i].getName().endsWith(".txt")) {
+                InputStream instream = null;
+                try {
+                    instream = new FileInputStream(files[i]);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
                 }
+
+                String fileName = FileUtils.getFileNameNoExtension(files[i]);
+                String fileContent = getFileContent2String(instream);
+                String fileTime = TimeUtils.millis2String(FileUtils.getFileLastModified(files[i]));
+
+                NoteInfo noteInfo = new NoteInfo();
+                noteInfo.setTitle(fileName);
+                noteInfo.setTime(fileTime);
+                noteInfo.setContent(fileContent);
+
+                mNoteInfoArrayList.add(noteInfo);
             }
         }
 
         mRecycleViewAdapter.notifyDataSetChanged();
         return mNoteInfoArrayList;
+    }
+
+    public static String getFileContent2String(InputStream inputStream) {
+        InputStreamReader inputStreamReader = null;
+
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        StringBuffer sb = new StringBuffer("");
+        String line;
+
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 
     @OnClick({R.id.fab})
@@ -322,12 +390,12 @@ public class MainActivity extends AppCompatActivity
 
     class myItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
-        private ItemTouchHelperAdapter itemTouchHelperAdapter;
+        private ItemTouchHelperListener mItemTouchHelperListener;
         private int mPosition;
         private NoteInfo mNoteInfoTemp;
 
-        public myItemTouchHelperCallBack(ItemTouchHelperAdapter itemTouchHelperAdapter) {
-            this.itemTouchHelperAdapter = itemTouchHelperAdapter;
+        public myItemTouchHelperCallBack(ItemTouchHelperListener itemTouchHelperListener) {
+            this.mItemTouchHelperListener = itemTouchHelperListener;
         }
 
         @Override
@@ -342,7 +410,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
             //onItemMove接口里的方法
-            itemTouchHelperAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+            mItemTouchHelperListener.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
             return true;
         }
 
@@ -351,7 +419,7 @@ public class MainActivity extends AppCompatActivity
             //onItemDelete接口里的方法
             mPosition = viewHolder.getAdapterPosition();
             mNoteInfoTemp = mNoteInfoArrayList.get(mPosition);
-            itemTouchHelperAdapter.onItemDelete(mPosition);
+            mItemTouchHelperListener.onItemDelete(mPosition);
 
             SnackbarUtils.with(mFab)
                     .setMessage("删除了一条数据")
@@ -359,7 +427,7 @@ public class MainActivity extends AppCompatActivity
                     .setAction("撤销", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            itemTouchHelperAdapter.onItemRecover(mPosition, mNoteInfoTemp);
+                            mItemTouchHelperListener.onItemRecover(mPosition, mNoteInfoTemp);
                         }
                     })
                     .show();

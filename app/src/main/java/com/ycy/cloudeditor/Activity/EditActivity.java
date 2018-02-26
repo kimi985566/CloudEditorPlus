@@ -46,6 +46,7 @@ import com.ycy.cloudeditor.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
@@ -85,14 +86,13 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
     public static final String CONTENT = "content";
 
     public static final int SELECT_PIC_RESULT_CODE = 202;
-    public static final int RC_WRITE_EXTERNAL = 101;
-    private String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     Unbinder mUnbinder;
 
     public static String Path = Environment.getExternalStorageDirectory()
             + File.separator + "CloudEditor" + File.separator;
     private FileOutputStream mFileOutputStream = null;
+    private File mFile;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -232,7 +232,8 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
     private boolean saveFile() {
 
         if (Build.VERSION.SDK_INT >= 23) {
-            int checkCallPhonePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int checkCallPhonePermission = ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (checkCallPhonePermission != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "需要SD卡读写权限，请重试", Toast.LENGTH_SHORT).show();
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -257,10 +258,10 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
             if (!dir.exists()) {
                 dir.mkdir();
             }
-            File file = new File(Path + mEditFragment.getTitle() + ".txt");
-            if (!file.exists()) {
-                file.createNewFile();
-                mFileOutputStream = new FileOutputStream(file);
+            mFile = new File(Path + mEditFragment.getTitle() + ".txt");
+            if (!mFile.exists()) {
+                mFile.createNewFile();
+                mFileOutputStream = new FileOutputStream(mFile);
                 mFileOutputStream.write(mEditorView.getText().toString().getBytes());
                 mFileOutputStream.flush();
                 SnackbarUtils.with(mVpEdit)
@@ -269,6 +270,23 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
                         .setBgColor(Color.GREEN)
                         .show();
                 LogUtils.i("Saved");
+            } else {
+                new AlertDialog.Builder(this)
+                        .setTitle("注意！")
+                        .setMessage("您已存在一个同名文件，是否覆盖保存？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    mFileOutputStream = new FileOutputStream(mFile);
+                                    mFileOutputStream.write(mEditorView.getText().toString().getBytes());
+                                    mFileOutputStream.flush();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).setNegativeButton("取消", null)
+                        .show();
             }
             return true;
         } catch (Exception e) {

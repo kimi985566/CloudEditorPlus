@@ -9,7 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ycy.cloudeditor.Bean.NoteInfo;
-import com.ycy.cloudeditor.Listener.ItemTouchHelperAdapter;
+import com.ycy.cloudeditor.Listener.ItemTouchHelperListener;
+import com.ycy.cloudeditor.Listener.MyItemClickListener;
 import com.ycy.cloudeditor.R;
 
 import java.util.Collections;
@@ -21,12 +22,13 @@ import java.util.List;
  */
 
 public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleViewAdapter.itemViewHolder>
-        implements ItemTouchHelperAdapter {
+        implements ItemTouchHelperListener, View.OnClickListener {
 
     public static String TAG = MainRecycleViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<NoteInfo> mNoteInfoList;
+    private MyItemClickListener mMyItemClickListener;
 
     public MainRecycleViewAdapter() {
 
@@ -41,12 +43,6 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
     public void removeAllItem() {
         mNoteInfoList.clear();
         notifyDataSetChanged();
-    }
-
-    //从List移除对象
-    public void removeItem(int position) {
-        mNoteInfoList.remove(position);
-        notifyItemRemoved(position);
     }
 
     @Override
@@ -67,10 +63,19 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
         notifyItemInserted(position);
     }
 
+    @Override
+    public void onClick(View v) {
+        if (mMyItemClickListener != null) {
+            mMyItemClickListener.onItemClick(v, (int) v.getTag());
+        }
+    }
+
     static class itemViewHolder extends RecyclerView.ViewHolder {
+
         private TextView mTv_title;
         private TextView mTv_content;
         private TextView mTv_time;
+        private MyItemClickListener mMyItemClickListener;
 
         public itemViewHolder(View itemView) {
             super(itemView);
@@ -100,4 +105,9 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
     public int getItemCount() {
         return mNoteInfoList.size();
     }
+
+    public void setMyItemClickListener(MyItemClickListener myItemClickListener) {
+        mMyItemClickListener = myItemClickListener;
+    }
+
 }
