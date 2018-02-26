@@ -65,4 +65,18 @@ public class NoteInfo implements Serializable {
         return genius_id;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof NoteInfo)) {
+            return false;
+        }
+
+        NoteInfo noteInfo = (NoteInfo) obj;
+
+        if (noteInfo.getTitle().equals(Title)) {
+            return true;
+        }
+
+        return false;
+    }
 }

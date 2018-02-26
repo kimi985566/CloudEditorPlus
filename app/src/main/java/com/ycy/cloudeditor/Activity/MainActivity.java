@@ -3,7 +3,6 @@ package com.ycy.cloudeditor.Activity;
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity
     private MainRecycleViewAdapter mRecycleViewAdapter;
     private LinearLayoutManager mLinearLayoutManager;
     private MyItemClickListener mMyItemClickListener;
+    private int mCount;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -320,11 +320,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private List<NoteInfo> searchFiles(String path) {
+
+        mCount = 0;
+
         File[] files = new File(path).listFiles();
 
         if (files == null) {
             return null;
         }
+
 
         for (int i = 0; i < files.length; i++) {
             // 判断是否为文件夹
@@ -348,11 +352,16 @@ public class MainActivity extends AppCompatActivity
                 noteInfo.setTime(fileTime);
                 noteInfo.setContent(fileContent);
 
-                mNoteInfoArrayList.add(noteInfo);
+                if (mNoteInfoArrayList.contains(noteInfo) == true) {
+                    break;
+                } else {
+                    mNoteInfoArrayList.add(noteInfo);
+                }
             }
         }
 
         mRecycleViewAdapter.notifyDataSetChanged();
+
         return mNoteInfoArrayList;
     }
 
