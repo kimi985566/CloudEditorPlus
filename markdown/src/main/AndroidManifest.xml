@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.xilingyuli.markdown">
+          package="com.yangchengyu.markdown">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 

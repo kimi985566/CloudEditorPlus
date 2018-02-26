@@ -1,4 +1,4 @@
-package com.xilingyuli.markdown;
+package com.yangchengyu.markdown.Adapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+
+import com.yangchengyu.markdown.Listener.OnPreInsertListener;
+import com.yangchengyu.markdown.R;
+import com.yangchengyu.markdown.View.MarkDownEditorView;
 
 public class ToolsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
 

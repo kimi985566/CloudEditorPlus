@@ -1,9 +1,14 @@
-package com.xilingyuli.markdown;
+package com.yangchengyu.markdown.Utils;
 
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
+
+import com.yangchengyu.markdown.Adapter.ToolsAdapter;
+import com.yangchengyu.markdown.Listener.OnPreInsertListener;
+import com.yangchengyu.markdown.View.MarkDownEditorView;
+import com.yangchengyu.markdown.View.MarkDownPreviewView;
 
 
 public class MarkDownController implements TextWatcher {

@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.xilingyuli.markdown.MarkDownPreviewView;
+import com.yangchengyu.markdown.View.MarkDownPreviewView;
 import com.ycy.cloudeditor.Activity.EditActivity;
 import com.ycy.cloudeditor.R;
 

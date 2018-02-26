@@ -16,7 +16,7 @@
         android:textSize="18sp"
         android:textStyle="bold"/>
 
-    <com.xilingyuli.markdown.MarkDownEditorView
+    <com.yangchengyu.markdown.View.MarkDownEditorView
         android:id="@+id/mdev_edit_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
