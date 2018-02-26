@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
     private MainRecycleViewAdapter mRecycleViewAdapter;
     private LinearLayoutManager mLinearLayoutManager;
+    private MyItemClickListener mMyItemClickListener;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -111,54 +112,36 @@ public class MainActivity extends AppCompatActivity
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initUI() {
-        setSupportActionBar(mToolbar);
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimary));
+        initActionBar();
 
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimary));
         mToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(mToggle);
         mToggle.syncState();
         mNavView.setNavigationItemSelectedListener(this);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-        }
-
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.recycler_color1, R.color.recycler_color2,
-                R.color.recycler_color3, R.color.recycler_color4);
-        //设置一进入开始刷新
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+        initSwipeRefreshLayout();
 
         initData();
-
 
         mLinearLayoutManager = new LinearLayoutManager(this);
         mMRecycleView.setLayoutManager(mLinearLayoutManager);
 
         mRecycleViewAdapter = new MainRecycleViewAdapter(this, mNoteInfoArrayList);
+        mMRecycleView.setAdapter(mRecycleViewAdapter);
 
-        mRecycleViewAdapter.setMyItemClickListener(new MyItemClickListener() {
+        mRecycleViewAdapter.setItemClickListener(new MyItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 NoteInfo noteInfo = mNoteInfoArrayList.get(position);
                 Intent intent = new Intent(view.getContext(), EditActivity.class);
                 intent.putExtra(EditActivity.TITLE, noteInfo.getTitle());
                 intent.putExtra(EditActivity.CONTENT, noteInfo.getContent());
-
                 startActivity(intent);
+                LogUtils.i("Click: " + position + intent);
             }
         });
-
-        mMRecycleView.setAdapter(mRecycleViewAdapter);
         mMRecycleView.setItemAnimator(new DefaultItemAnimator());
         mMRecycleView.setHasFixedSize(true);
 
@@ -184,6 +167,29 @@ public class MainActivity extends AppCompatActivity
         ItemTouchHelper.Callback callback = new myItemTouchHelperCallBack(mRecycleViewAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(mMRecycleView);
+    }
+
+    private void initSwipeRefreshLayout() {
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.recycler_color1, R.color.recycler_color2,
+                R.color.recycler_color3, R.color.recycler_color4);
+        //设置一进入开始刷新
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+    }
+
+    private void initActionBar() {
+        setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+        }
     }
 
     private void initData() {
@@ -407,6 +413,10 @@ public class MainActivity extends AppCompatActivity
             return makeMovementFlags(dragFlags, swipeFlags);
         }
 
+        public void setItemTouchHelperListener(ItemTouchHelperListener itemTouchHelperListener) {
+            mItemTouchHelperListener = itemTouchHelperListener;
+        }
+
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
             //onItemMove接口里的方法
@@ -463,5 +473,4 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     }
-
 }

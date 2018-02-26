@@ -1,7 +1,5 @@
 package com.ycy.cloudeditor.Listener;
 
-import android.view.View;
-
 import com.ycy.cloudeditor.Bean.NoteInfo;
 
 /**
@@ -15,6 +13,7 @@ public interface ItemTouchHelperListener {
     //删除item
     public void onItemDelete(int position);
 
+    //恢复item
     public void onItemRecover(int position, NoteInfo noteInfo);
 
 }

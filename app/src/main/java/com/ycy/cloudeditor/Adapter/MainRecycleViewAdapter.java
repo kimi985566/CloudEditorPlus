@@ -28,7 +28,7 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
 
     private Context mContext;
     private List<NoteInfo> mNoteInfoList;
-    private MyItemClickListener mMyItemClickListener;
+    private MyItemClickListener mItemClickListener = null;
 
     public MainRecycleViewAdapter() {
 
@@ -43,6 +43,10 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
     public void removeAllItem() {
         mNoteInfoList.clear();
         notifyDataSetChanged();
+    }
+
+    public void setItemClickListener(MyItemClickListener itemClickListener) {
+        this.mItemClickListener = itemClickListener;
     }
 
     @Override
@@ -65,8 +69,8 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
 
     @Override
     public void onClick(View v) {
-        if (mMyItemClickListener != null) {
-            mMyItemClickListener.onItemClick(v, (int) v.getTag());
+        if (mItemClickListener != null) {
+            mItemClickListener.onItemClick(v, (int) v.getTag());
         }
     }
 
@@ -75,7 +79,6 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
         private TextView mTv_title;
         private TextView mTv_content;
         private TextView mTv_time;
-        private MyItemClickListener mMyItemClickListener;
 
         public itemViewHolder(View itemView) {
             super(itemView);
@@ -89,6 +92,7 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
     @Override
     public itemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_note_card, parent, false);
+        view.setOnClickListener(this);
         Log.i(TAG, ": itemViewHolder 布局成功");
         return new itemViewHolder(view);
     }
@@ -104,10 +108,6 @@ public class MainRecycleViewAdapter extends RecyclerView.Adapter<MainRecycleView
     @Override
     public int getItemCount() {
         return mNoteInfoList.size();
-    }
-
-    public void setMyItemClickListener(MyItemClickListener myItemClickListener) {
-        mMyItemClickListener = myItemClickListener;
     }
 
 }

@@ -99,17 +99,10 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
-        Utils.init(this);
         mUnbinder = ButterKnife.bind(this);
+        Utils.init(this);
         mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                initUI();
-            }
-        }).start();
-
+        initUI();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
