@@ -34,6 +34,7 @@ import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.Utils;
 import com.ycy.cloudeditor.Adapter.MainRecycleViewAdapter;
 import com.ycy.cloudeditor.Bean.NoteInfo;
+import com.ycy.cloudeditor.CloudEditorApplication;
 import com.ycy.cloudeditor.Listener.ItemTouchHelperListener;
 import com.ycy.cloudeditor.Listener.MyItemClickListener;
 import com.ycy.cloudeditor.R;
@@ -87,8 +88,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
     private MainRecycleViewAdapter mRecycleViewAdapter;
     private LinearLayoutManager mLinearLayoutManager;
-    private MyItemClickListener mMyItemClickListener;
-    private int mCount;
+    private CloudEditorApplication mApplication;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Utils.init(this);
         mUnbinder = ButterKnife.bind(this);
+        mApplication = (CloudEditorApplication) getApplication();
         ask_perms();
         initUI();
     }
@@ -320,15 +321,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private List<NoteInfo> searchFiles(String path) {
-
-        mCount = 0;
-
         File[] files = new File(path).listFiles();
 
         if (files == null) {
             return null;
         }
-
 
         for (int i = 0; i < files.length; i++) {
             // 判断是否为文件夹
