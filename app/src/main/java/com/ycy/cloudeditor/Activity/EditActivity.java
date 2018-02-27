@@ -34,12 +34,11 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SnackbarUtils;
-import com.blankj.utilcode.util.Utils;
+import com.yangchengyu.markdown.Adapter.ToolsAdapter;
+import com.yangchengyu.markdown.Listener.OnPreInsertListener;
 import com.yangchengyu.markdown.Utils.MarkDownController;
 import com.yangchengyu.markdown.View.MarkDownEditorView;
 import com.yangchengyu.markdown.View.MarkDownPreviewView;
-import com.yangchengyu.markdown.Listener.OnPreInsertListener;
-import com.yangchengyu.markdown.Adapter.ToolsAdapter;
 import com.ycy.cloudeditor.Fragment.EditFragment;
 import com.ycy.cloudeditor.Fragment.PreviewFragment;
 import com.ycy.cloudeditor.R;
@@ -100,7 +99,6 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
         mUnbinder = ButterKnife.bind(this);
-        Utils.init(this);
         mInputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         initUI();
     }
@@ -266,7 +264,7 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
             } else {
                 new AlertDialog.Builder(this)
                         .setTitle("注意！")
-                        .setMessage("您已存在一个同名文件，是否覆盖保存？")
+                        .setMessage("是否覆盖保存？")
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -274,6 +272,12 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
                                     mFileOutputStream = new FileOutputStream(mFile);
                                     mFileOutputStream.write(mEditorView.getText().toString().getBytes());
                                     mFileOutputStream.flush();
+                                    SnackbarUtils.with(mVpEdit)
+                                            .setMessage("保存成功")
+                                            .setDuration(SnackbarUtils.LENGTH_SHORT)
+                                            .setBgColor(Color.GREEN)
+                                            .show();
+                                    LogUtils.i("Saved");
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }

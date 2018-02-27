@@ -31,7 +31,6 @@ import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SnackbarUtils;
 import com.blankj.utilcode.util.TimeUtils;
-import com.blankj.utilcode.util.Utils;
 import com.ycy.cloudeditor.Adapter.MainRecycleViewAdapter;
 import com.ycy.cloudeditor.Bean.NoteInfo;
 import com.ycy.cloudeditor.CloudEditorApplication;
@@ -74,18 +73,17 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout mSwipeRefreshLayout;
 
+    private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
     Unbinder mUnbinder;
-
-    private ActionBarDrawerToggle mToggle;
-    private static final int RC_STORAGE = 101;
     private boolean mIsExit;
+    private static final int RC_STORAGE = 101;
 
     String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET};
     public static String Path = Environment.getExternalStorageDirectory()
             + File.separator + "CloudEditor" + File.separator;
 
-    private ArrayList<NoteInfo> mNoteInfoArrayList = new ArrayList<>();
+    private ActionBarDrawerToggle mToggle;
     private MainRecycleViewAdapter mRecycleViewAdapter;
     private LinearLayoutManager mLinearLayoutManager;
     private CloudEditorApplication mApplication;
@@ -95,13 +93,13 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Utils.init(this);
         mUnbinder = ButterKnife.bind(this);
         mApplication = (CloudEditorApplication) getApplication();
         ask_perms();
         initUI();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void ask_perms() {
         if (EasyPermissions.hasPermissions(this, perms)) {
             LogUtils.i("Permissions are granted");
@@ -114,6 +112,7 @@ public class MainActivity extends AppCompatActivity
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initUI() {
+
         initActionBar();
 
         getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimary));

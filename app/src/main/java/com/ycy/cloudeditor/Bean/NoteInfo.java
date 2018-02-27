@@ -40,7 +40,6 @@ public class NoteInfo implements Serializable {
         this.time = time;
     }
 
-
     public String getTitle() {
         return Title;
     }
