@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity
     private MainRecycleViewAdapter mRecycleViewAdapter;
     private LinearLayoutManager mLinearLayoutManager;
     private CloudEditorApplication mApplication;
+    private NoteInfo mNoteInfoTemp;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -439,7 +441,6 @@ public class MainActivity extends AppCompatActivity
     class myItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
         private int mPosition;
-        private NoteInfo mNoteInfoTemp;
         private ItemTouchHelperListener mItemTouchHelperListener;
 
         public myItemTouchHelperCallBack(ItemTouchHelperListener itemTouchHelperListener) {
@@ -473,16 +474,15 @@ public class MainActivity extends AppCompatActivity
             mNoteInfoTemp = mNoteInfoArrayList.get(mPosition);
             mItemTouchHelperListener.onItemDelete(mPosition);
 
-            SnackbarUtils.with(mFab)
-                    .setMessage("删除了一条数据")
-                    .setDuration(SnackbarUtils.LENGTH_LONG)
-                    .setAction("撤销", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mItemTouchHelperListener.onItemRecover(mPosition, mNoteInfoTemp);
-                        }
-                    })
-                    .show();
+            Snackbar snackbar = Snackbar.make(mFab, "是否撤销删除", Snackbar.LENGTH_LONG);
+            snackbar.setAction("Yes", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mItemTouchHelperListener.onItemRecover(mPosition, mNoteInfoTemp);
+                }
+            });
+            snackbar.addCallback(new MySnackBarCallBack());
+            snackbar.show();
         }
 
         @Override
@@ -515,5 +515,19 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
+    }
+
+    private class MySnackBarCallBack extends Snackbar.Callback {
+        @Override
+        public void onDismissed(Snackbar transientBottomBar, int event) {
+            super.onDismissed(transientBottomBar, event);
+            if (event == DISMISS_EVENT_SWIPE
+                    || event == DISMISS_EVENT_TIMEOUT
+                    || event == DISMISS_EVENT_CONSECUTIVE) {
+                File file = new File(Path + mNoteInfoTemp.getTitle() + ".txt");
+                file.delete();
+                LogUtils.i(mNoteInfoTemp.getTitle() + " deleted");
+            }
+        }
     }
 }

@@ -258,8 +258,7 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
                 SnackbarUtils.with(mVpEdit)
                         .setMessage("保存成功")
                         .setDuration(SnackbarUtils.LENGTH_SHORT)
-                        .setBgColor(Color.GREEN)
-                        .show();
+                        .showSuccess();
                 LogUtils.i("Saved");
             } else {
                 new AlertDialog.Builder(this)
@@ -275,8 +274,7 @@ public class EditActivity extends AppCompatActivity implements OnPreInsertListen
                                     SnackbarUtils.with(mVpEdit)
                                             .setMessage("保存成功")
                                             .setDuration(SnackbarUtils.LENGTH_SHORT)
-                                            .setBgColor(Color.GREEN)
-                                            .show();
+                                            .showSuccess();
                                     LogUtils.i("Saved");
                                 } catch (IOException e) {
                                     e.printStackTrace();
