@@ -37,6 +37,7 @@ import com.ycy.cloudeditor.CloudEditorApplication;
 import com.ycy.cloudeditor.Listener.ItemTouchHelperListener;
 import com.ycy.cloudeditor.Listener.MyItemClickListener;
 import com.ycy.cloudeditor.R;
+import com.ycy.cloudeditor.Utils.RxUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,6 +56,11 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -146,6 +152,49 @@ public class MainActivity extends AppCompatActivity
         mMRecycleView.setItemAnimator(new DefaultItemAnimator());
         mMRecycleView.setHasFixedSize(true);
 
+        initRecycleViewScrollListener();
+
+        initItemCallBack();
+    }
+
+    private void initActionBar() {
+        setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+        }
+    }
+
+    private void initSwipeRefreshLayout() {
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.recycler_color1, R.color.recycler_color2,
+                R.color.recycler_color3, R.color.recycler_color4);
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
+    }
+
+    private void initData() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                searchFiles(Path);
+            }
+        }, 1500);
+    }
+
+    private void initItemCallBack() {
+        ItemTouchHelper.Callback callback = new myItemTouchHelperCallBack(mRecycleViewAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(mMRecycleView);
+    }
+
+    private void initRecycleViewScrollListener() {
         mMRecycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -164,43 +213,97 @@ public class MainActivity extends AppCompatActivity
                 LogUtils.i("CHECK_SCROLL_DOWN: " + recyclerView.canScrollVertically(-1));
             }
         });
-
-        ItemTouchHelper.Callback callback = new myItemTouchHelperCallBack(mRecycleViewAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(mMRecycleView);
     }
 
-    private void initSwipeRefreshLayout() {
-        mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.recycler_color1, R.color.recycler_color2,
-                R.color.recycler_color3, R.color.recycler_color4);
-        //设置一进入开始刷新
-        mSwipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshLayout.setRefreshing(true);
-            }
-        });
+    private void searchFiles(String path) {
+        File files = new File(path);
+
+        Observable.just(files)
+                // 遍历文件夹,通过flatMap转换为Observable<File>
+                .flatMap(new Func1<File, Observable<File>>() {
+                    @Override
+                    public Observable<File> call(File file) {
+                        return RxUtils.listFiles(file);
+                    }
+                })
+                // 筛选以.txt结尾的文件
+                .filter(new Func1<File, Boolean>() {
+                    @Override
+                    public Boolean call(File file) {
+                        return file.getName().endsWith(".txt");
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<File>() {
+                    @Override
+                    public void onCompleted() {
+                        mRecycleViewAdapter.notifyDataSetChanged();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        SnackbarUtils.with(mFab)
+                                .setDuration(SnackbarUtils.LENGTH_SHORT)
+                                .setMessage("刷新错误")
+                                .showError();
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onNext(File file) {
+                        InputStream instream = null;
+                        try {
+                            instream = new FileInputStream(file);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        String fileName = FileUtils.getFileNameNoExtension(file);
+                        String fileContent = getFileContent2String(instream);
+                        String fileTime = TimeUtils.millis2String(FileUtils.getFileLastModified(file));
+
+                        NoteInfo noteInfo = new NoteInfo();
+                        noteInfo.setTitle(fileName);
+                        noteInfo.setTime(fileTime);
+                        noteInfo.setContent(fileContent);
+
+                        if (!mNoteInfoArrayList.contains(noteInfo) == true) {
+                            mNoteInfoArrayList.add(noteInfo);
+                        }
+                    }
+
+                    @Override
+                    public void onStart() {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                        super.onStart();
+                    }
+                });
     }
 
-    private void initActionBar() {
-        setSupportActionBar(mToolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
+    public static String getFileContent2String(InputStream inputStream) {
+        InputStreamReader inputStreamReader = null;
+
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-    }
 
-    private void initData() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                searchFiles(Path);
-                mSwipeRefreshLayout.setRefreshing(false);
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        StringBuffer sb = new StringBuffer("");
+        String line;
+
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
             }
-        }, 1500);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
 
     @Override
@@ -257,6 +360,31 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @OnClick({R.id.fab})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.fab:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                        startActivity(intent);
+                    }
+                }).start();
+                break;
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                searchFiles(Path);
+            }
+        }, 1500);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         LogUtils.i(this.getClass().getSimpleName() + ": onKeyDown");
@@ -282,6 +410,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mUnbinder.unbind();
+        LogUtils.i(this.getClass().getSimpleName() + ": onDestory");
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
@@ -301,113 +436,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mUnbinder.unbind();
-        LogUtils.i(this.getClass().getSimpleName() + ": onDestory");
-    }
-
-    @Override
-    public void onRefresh() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                searchFiles(Path);
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        }, 1500);
-    }
-
-    private List<NoteInfo> searchFiles(String path) {
-        File[] files = new File(path).listFiles();
-
-        if (files == null) {
-            return null;
-        }
-
-        for (int i = 0; i < files.length; i++) {
-            // 判断是否为文件夹
-            if (files[i].isDirectory()) {
-                LogUtils.i(files[i].getAbsolutePath());
-                searchFiles(files[i].getAbsolutePath());
-            } else if (!files[i].isHidden() && files[i].getName().endsWith(".txt")) {
-                InputStream instream = null;
-                try {
-                    instream = new FileInputStream(files[i]);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                String fileName = FileUtils.getFileNameNoExtension(files[i]);
-                String fileContent = getFileContent2String(instream);
-                String fileTime = TimeUtils.millis2String(FileUtils.getFileLastModified(files[i]));
-
-                NoteInfo noteInfo = new NoteInfo();
-                noteInfo.setTitle(fileName);
-                noteInfo.setTime(fileTime);
-                noteInfo.setContent(fileContent);
-
-                if (mNoteInfoArrayList.contains(noteInfo) == true) {
-                    break;
-                } else {
-                    mNoteInfoArrayList.add(noteInfo);
-                }
-            }
-        }
-
-        mRecycleViewAdapter.notifyDataSetChanged();
-
-        return mNoteInfoArrayList;
-    }
-
-    public static String getFileContent2String(InputStream inputStream) {
-        InputStreamReader inputStreamReader = null;
-
-        try {
-            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuffer sb = new StringBuffer("");
-        String line;
-
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return sb.toString();
-    }
-
-    @OnClick({R.id.fab})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.fab:
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                        startActivity(intent);
-                    }
-                }).start();
-                break;
-        }
-    }
-
     class myItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
-        private ItemTouchHelperListener mItemTouchHelperListener;
         private int mPosition;
         private NoteInfo mNoteInfoTemp;
+        private ItemTouchHelperListener mItemTouchHelperListener;
 
         public myItemTouchHelperCallBack(ItemTouchHelperListener itemTouchHelperListener) {
             this.mItemTouchHelperListener = itemTouchHelperListener;
+        }
+
+        public void setItemTouchHelperListener(ItemTouchHelperListener itemTouchHelperListener) {
+            mItemTouchHelperListener = itemTouchHelperListener;
         }
 
         @Override
@@ -417,10 +457,6 @@ public class MainActivity extends AppCompatActivity
             //允许从右向左滑动
             int swipeFlags = ItemTouchHelper.LEFT;
             return makeMovementFlags(dragFlags, swipeFlags);
-        }
-
-        public void setItemTouchHelperListener(ItemTouchHelperListener itemTouchHelperListener) {
-            mItemTouchHelperListener = itemTouchHelperListener;
         }
 
         @Override
@@ -478,5 +514,6 @@ public class MainActivity extends AppCompatActivity
             //该方法返回true时，表示如果用户触摸并且左滑了view，那么可以执行滑动删除操作，就是可以调用onSwiped()方法
             return true;
         }
+
     }
 }
